@@ -1,0 +1,206 @@
+{% extends 'base.html' %} {% block content %}
+<title>{{data.Title}}</title>
+<style>
+  .rmimg {
+    width: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+  }
+
+.ssttiicckkyy{
+    position:sticky;
+    top:0px;
+}
+
+    @media screen and (min-width:321px) and (max-width:374px) {
+
+
+    .commentbox {
+        height: 202px;
+        overflow: scroll;
+    }
+
+    }
+
+  .roundbtn {
+    height: 60px;
+    width: 60px;
+    border-radius: 100%;
+  }
+  .cbi {
+    margin: auto;
+  }
+
+  .commentbox {
+    height: 202px;
+    margin: auto;
+    overflow: scroll;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-6 text-center">
+      <img src="{{data.Pin.url}}" class="rmimg mt-2 mb-5" alt="" />
+    </div>
+
+    <div class="col-lg-6 text-center ">
+        <div class="ssttiicckkyy">
+
+
+      <h1>{{data.Title}}</h1>
+      {% if data.created_by == user.username %}
+      <a href="{% url 'DeletePin' data.id %}" class="btn btn-danger btn-sm">Delete Pin</a>
+      <br>
+      {% endif %}
+      <a
+        href="{{data.Pin.url}}"
+        class="btn btn-outline-primary mt-3"
+        target="_blank"
+        >View in Full Screen</a
+      >
+      <br />
+      <button
+        class="btn btn-success mt-3 roundbtn"
+        onclick='copyText1("{{data.Pin.url}}","{{data.Title}}")'
+      >
+        <i class="fa-solid fa-file-arrow-down fs-2"></i>
+      </button>
+      <script>
+        function copyText1(url, title) {
+          let imgpath = url;
+          let filename = title;
+
+          if (saveAs(imgpath, filename)) {
+            alert("Pin Downloaded");
+          }
+        }
+        function getFileName(str) {
+          return str.substring(str.lastIndexOf("/") + 1);
+        }
+        // console.log("{{data}}")
+      </script>
+
+      <h5 class="mt-2">Pin By - {{data.created_by}}</h5>
+      <div class="commentdiv mt-3 text-center">
+        <div class="dlikeiv">
+          <h4>{{number_of_likes}}</h4>
+          <form action="{% url 'LikePin' data.id %}" method="post">
+            {% csrf_token %}
+            <button
+              type="submit"
+              name="pin_id"
+              value="{{data.id}}"
+              class="btn fs-2"
+            >
+              {% if liked %}
+              <i class="fa-solid fa-heart" style="color: #ff0000"></i>
+              {% else %}
+              <i class="fa-regular fa-heart" style="color: #ff0000"></i>
+              {% endif %}
+            </button>
+            <div></div>
+          </form>
+        </div>
+
+        <form action="{% url 'Commentbox' %}" method="post">
+          {% csrf_token %}
+          <input type="text" name="postid" id="postid" value="" hidden />
+          <input
+            type="text"
+            name="comment"
+            class="form-control w-50 cbi"
+            placeholder="Comment Here"
+            id=""
+            required
+          />
+          <input type="text" name="profileid" id="comment_by" value="" hidden />
+          {% if user.is_authenticated %}
+          <button type="submit" class="btn btn-outline-success mt-1">
+            Add Comment
+          </button>
+          {% endif %}
+        </form>
+        <script>
+          document.getElementById("postid").value = "{{data.id}}";
+          document.getElementById("comment_by").value = "{{user.id}}";
+        </script>
+
+        <br />
+
+        {% if comment %}
+        <div class="commentbox w-100 mt-2 mb-5">
+            <h4 class="text-center" >Comments</h4>
+            <hr>
+          {% for i in comment %}
+          <p class="mb-1">
+            {{i.comment_by}} - {{i.Comment}} {% if i.comment_by == user %}
+            &nbsp;
+
+            <a href="{% url 'deletecomment' i.id data.id %}"
+              ><i class="fa-solid fa-trash" style="color: #ed0707"></i
+            ></a>
+
+            {% comment %}
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+            >
+              <i class="fa-solid fa-trash" style="color: #ed0707"></i>
+            </button>
+            {% endcomment %} {% endif %}
+          </p>
+
+          {% endfor %}
+        </div>
+        {% else %}
+        <h6 class="mt-2">Be first one to comment</h6>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+        </div>
+
+<!-- Button trigger modal -->
+
+<!-- Modal -->
+{% comment %}
+
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Are you Sure?</h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        delete {{i.Comment}} ? <br />
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          No
+        </button>
+        <a href="" class="btn btn-danger">Yes Delete</a>
+      </div>
+      <div class="modal-footer"></div>
+    </div>
+  </div>
+</div>
+{% endcomment %} {% endblock %}
